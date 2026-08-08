@@ -21,6 +21,11 @@ function syncLessonData() {
       const routeLesson = LESSONS[index];
       if (routeLesson) {
         Object.assign(routeLesson, sourceLesson, { stage: section.stage });
+        Object.assign(sourceLesson, {
+          day: routeLesson.day,
+          slug: routeLesson.slug,
+          stage: section.stage
+        });
       }
       index += 1;
     }
@@ -80,6 +85,27 @@ function renderMath() {
   } else {
     window.setTimeout(renderMath, 60);
   }
+}
+
+function bindInPageNavigation() {
+  app.querySelectorAll('[data-scroll-target]').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const targetId = link.dataset.scrollTarget;
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  app.querySelectorAll('details').forEach(details => {
+    details.addEventListener('toggle', () => {
+      if (details.open && window.MathJax?.typesetPromise) {
+        window.MathJax.typesetClear?.([details]);
+        window.MathJax.typesetPromise([details]).catch(error => {
+          console.error('MathJax answer rendering failed:', error);
+        });
+      }
+    });
+  });
 }
 
 function publishedLessons() {
@@ -238,12 +264,13 @@ function lessonPage(slug) {
         <div class="card toc-card">
           <h3>On this page</h3>
           <ol>
-            ${pageLinks.map(link => `<li><a href="#/lesson/${lesson.slug}#${link.id}">${esc(link.label)}</a></li>`).join('')}
+            ${pageLinks.map(link => `<li><a href="#/lesson/${lesson.slug}" data-scroll-target="${link.id}">${esc(link.label)}</a></li>`).join('')}
           </ol>
         </div>
       </aside>
     </div>`;
 
+  bindInPageNavigation();
   renderMath();
 }
 
