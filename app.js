@@ -71,7 +71,9 @@ function courseHome() {
 }
 
 function lessonPage(slug) {
-  const lesson = LESSONS.find(item => item.slug === slug);
+  const lesson = LESSONS.find(item =>
+    item.slug === slug || item.slug.replace(/^day-\d+-/, '') === slug
+  );
   if (!lesson) return notFound();
   const index = LESSONS.indexOf(lesson);
   const prev = LESSONS[index - 1];
