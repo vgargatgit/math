@@ -4,6 +4,29 @@ function esc(value) {
   return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function restoreMath(text) {
+  let out = '';
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] !== '(') { out += text[i++]; continue; }
+    let depth = 0;
+    let j = i;
+    for (; j < text.length; j++) {
+      if (text[j] === '(') depth++;
+      else if (text[j] === ')') {
+        depth--;
+        if (depth === 0) break;
+      }
+    }
+    if (j >= text.length) { out += text[i++]; continue; }
+    const inner = text.slice(i + 1, j);
+    const looksLikeMath = /[\\=^_<>]|^\s*[A-Za-z](?:\s|$)|^\s*[0-9.-]/.test(inner);
+    out += looksLikeMath ? `\\(${inner}\\)` : `(${inner})`;
+    i = j + 1;
+  }
+  return out;
+}
+
 function renderMath() {
   if (window.MathJax?.typesetPromise) {
     window.MathJax.typesetClear?.([app]);
@@ -82,13 +105,13 @@ function lessonPage(slug) {
             <div class="example">
               <div class="label">Example ${i + 1}</div>
               <h3>${esc(title)}</h3>
-              <div class="math-block">${body}</div>
+              <div class="math-block">${restoreMath(body)}</div>
             </div>`).join('')}
         </section>
 
         <section class="lesson-panel" id="practice">
           <h2>Check your understanding</h2>
-          <ol class="practice">${lesson.practice.map(q => `<li>${q}</li>`).join('')}</ol>
+          <ol class="practice">${lesson.practice.map(q => `<li>${restoreMath(q)}</li>`).join('')}</ol>
           <div class="callout"><strong>Study method:</strong> Do the calculation on paper first. Then verify it with a small NumPy or calculator example.</div>
         </section>
 
