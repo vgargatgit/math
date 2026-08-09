@@ -1,6 +1,4 @@
 const day2 = COURSE[0].lessons[1];
-const raw = String.raw;
-
 Object.assign(day2, {
   published: true,
   summary: "Use vectors, matrices, and tensors with confidence. Learn the shape rules that make neural-network equations readable before you calculate any numbers.",
