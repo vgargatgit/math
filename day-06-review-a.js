@@ -1,6 +1,9 @@
 day6.practice.push(
-  'For a function with four inputs and three outputs, what is the Jacobian shape? Answer: 3 by 4.',
-  'If a scalar objective depends on a 7 by 2 parameter matrix, what is the parameter-gradient shape? Answer: 7 by 2.',
-  'For an element-wise cube function, what structure does the Jacobian have? Answer: diagonal.',
-  'If two local Jacobians have shapes 2 by 5 and 5 by 3, what is their chain-rule product shape? Answer: 2 by 3.'
+  String.raw`For a function \(f:\mathbb{R}^{4}\to\mathbb{R}^{3}\), what is the Jacobian shape under the course convention? <details><summary>Show answer</summary><p>\(3\times4\). There is one row for each output and one column for each input coordinate.</p></details>`,
+  String.raw`If a scalar loss depends on \(W\in\mathbb{R}^{7\times2}\), what shape must \(\partial L/\partial W\) have? <details><summary>Show answer</summary><p>\(7\times2\), the same shape as \(W\). Each stored parameter entry receives one sensitivity value.</p></details>`,
+  String.raw`For \(y_i=x_i^3\), what structure does \(\partial y/\partial x\) have? <details><summary>Show answer</summary><p>It is diagonal, with diagonal entries \(3x_i^2\). Off-diagonal entries are structural zeros because \(y_i\) does not depend on \(x_j\) for \(i\ne j\).</p></details>`,
+  String.raw`If \(J_{y,u}\) has shape \(2\times5\) and \(J_{u,x}\) has shape \(5\times3\), what is the shape and order of the chain-rule product? <details><summary>Show answer</summary><p>\(J_{y,x}=J_{y,u}J_{u,x}\). Its shape is \((2\times5)(5\times3)=2\times3\).</p></details>`,
+  String.raw`For an affine layer with \(x\in\mathbb{R}^{1\times4}\) and \(\delta\in\mathbb{R}^{1\times3}\), what is the shape of \(x^\top\delta\)? <details><summary>Show answer</summary><p>\((4\times1)(1\times3)=4\times3\). This is the required shape of a \(4\times3\) weight matrix gradient.</p></details>`,
+  String.raw`Why does a bias broadcast across every batch row require a sum in the backward pass? <details><summary>Show answer</summary><p>The same stored bias entry influences every row. Each use contributes a derivative, so the backward pass adds those contributions over the broadcast axis.</p></details>`,
+  String.raw`For \(q=x^\top A x\), what is \(\nabla_x q\) when \(A\) is not assumed symmetric? <details><summary>Show answer</summary><p>\((A+A^\top)x\). The shorter formula \(2Ax\) is valid only when \(A=A^\top\).</p></details>`
 );
