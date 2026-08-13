@@ -1,1 +1,1 @@
-day6.practice.push('If a vector function has four inputs and three outputs, what is its Jacobian shape under the course convention? Answer: 3 by 4.');
+day6.practice.push(String.raw`For \(f:\mathbb{R}^{4}\to\mathbb{R}^{3}\), what is the Jacobian shape? Answer: \(3\times4\).`);
