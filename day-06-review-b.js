@@ -1,4 +1,10 @@
 day6.practice.push(
-  'For an affine layer with input width 4 and output width 3, what is the weight-gradient shape? Answer: 4 by 3.',
-  'Why does a shared bias require a sum over the batch during differentiation? Answer: every use contributes to the same stored bias entry.'
+  String.raw`Does softmax have a diagonal Jacobian? Why? <details><summary>Show answer</summary><p>No. Every softmax output uses the shared denominator \(\sum_j e^{z_j}\). Changing one logit changes that denominator and therefore changes every output probability.</p></details>`,
+  String.raw`For \(p=(0.2,0.5,0.3)^\top\) and one-hot target \(y=(1,0,0)^\top\), what is \(p-y\)? <details><summary>Show answer</summary><p>\((-0.8,0.5,0.3)^\top\). This is the combined softmax-cross-entropy gradient with respect to the logits.</p></details>`,
+  String.raw`At \(x=0\), does ReLU have an ordinary mathematical derivative? <details><summary>Show answer</summary><p>No. The left and right derivatives differ. Software frameworks choose a convention at zero, commonly a derivative of zero.</p></details>`,
+  String.raw`If \(X\) has shape \(8\times6\) and \(G\) has shape \(8\times4\), what shape does \(X^\top G\) have? <details><summary>Show answer</summary><p>\((6\times8)(8\times4)=6\times4\). This can match a weight matrix with six input features and four output features.</p></details>`,
+  String.raw`Why can gradients from a batch sum and a batch mean differ by a factor of the batch size \(B\)? <details><summary>Show answer</summary><p>The mean objective is \(B^{-1}\sum_r L_r\). Differentiation keeps the constant factor \(1/B\), so the mean gradient is the summed gradient divided by \(B\).</p></details>`,
+  String.raw`For \(L(\theta)=\theta^3\), what exact derivative should a finite-difference check approach at \(\theta=2\)? <details><summary>Show answer</summary><p>\(dL/d\theta=3\theta^2\), so at \(\theta=2\) the exact value is \(12\).</p></details>`,
+  String.raw`A parameter is used in three graph branches. What happens to the three backward contributions? <details><summary>Show answer</summary><p>They are added. The derivative of the final loss with respect to that shared parameter is the sum of all path contributions.</p></details>`,
+  String.raw`Name three checks to use before you accept an unfamiliar matrix derivative from a paper. <details><summary>Show answer</summary><p>First identify the derivative convention. Then verify all object and derivative shapes. Finally test a small numerical case or a finite-difference directional derivative.</p></details>`
 );
