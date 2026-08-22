@@ -15,6 +15,18 @@
     return Array.isArray(window.MATH_APPENDIX) ? window.MATH_APPENDIX : [];
   }
 
+  function isCourseUnit(entry) {
+    return entry.slug?.startsWith("applied-linear-algebra-unit-");
+  }
+
+  function cardLabel(entry) {
+    return isCourseUnit(entry) ? "Course unit" : "Why?";
+  }
+
+  function entryEyebrow(entry) {
+    return isCourseUnit(entry) ? "Applied linear algebra appendix" : "Why? · Concept appendix";
+  }
+
   function ensureAppendixNavigation() {
     const nav = document.querySelector(".site-header nav");
     if (!nav || nav.querySelector('a[href="#/appendix"]')) return;
@@ -40,21 +52,39 @@
 
   function appendixIndexPage() {
     const items = entries();
+    const courseUnits = items.filter(isCourseUnit);
+    const explanations = items.filter(entry => !isCourseUnit(entry));
+
+    const cards = group => group.map(entry => `
+      <a class="appendix-card" href="#/appendix/${entry.slug}">
+        <span class="appendix-card-label">${cardLabel(entry)}</span>
+        <h2>${esc(entry.shortTitle || entry.title)}</h2>
+        <p>${esc(entry.summary)}</p>
+        <div class="appendix-card-source">From ${esc(entry.relatedLesson.label)} · ${esc(entry.relatedLesson.section)}</div>
+      </a>`).join("");
+
     appRoot.innerHTML = `
       <section class="appendix-hero">
-        <div class="eyebrow">Concept appendix</div>
-        <h1>Why does this work?</h1>
-        <p class="lead">Lessons keep the main path focused. Deeper explanations, proofs of intuition, and answers to important “why?” questions live here.</p>
+        <div class="eyebrow">Course appendix</div>
+        <h1>Go deeper when you need the full mathematics.</h1>
+        <p class="lead">The daily lessons keep the AI/ML path focused. The appendix contains deeper “why?” explanations and structured undergraduate mathematics units that support the course.</p>
       </section>
-      <section class="appendix-grid" aria-label="Appendix explanations">
-        ${items.map(entry => `
-          <a class="appendix-card" href="#/appendix/${entry.slug}">
-            <span class="appendix-card-label">Why?</span>
-            <h2>${esc(entry.shortTitle || entry.title)}</h2>
-            <p>${esc(entry.summary)}</p>
-            <div class="appendix-card-source">From ${esc(entry.relatedLesson.label)} · ${esc(entry.relatedLesson.section)}</div>
-          </a>`).join("")}
-      </section>`;
+      ${courseUnits.length ? `
+        <section class="stage">
+          <div class="stage-heading">
+            <h2>Stage 1 · Applied Linear Algebra</h2>
+            <p>${courseUnits.length} undergraduate-depth units</p>
+          </div>
+          <div class="appendix-grid" aria-label="Applied linear algebra appendix units">${cards(courseUnits)}</div>
+        </section>` : ""}
+      ${explanations.length ? `
+        <section class="stage">
+          <div class="stage-heading">
+            <h2>Why? explanations</h2>
+            <p>Deeper explanations linked from lessons</p>
+          </div>
+          <div class="appendix-grid" aria-label="Concept explanations">${cards(explanations)}</div>
+        </section>` : ""}`;
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
@@ -73,7 +103,7 @@
     appRoot.innerHTML = `
       <div class="breadcrumbs"><a href="#/">Course</a> / <a href="#/appendix">Appendix</a></div>
       <header class="lesson-header appendix-entry-header">
-        <div class="eyebrow">Why? · Concept appendix</div>
+        <div class="eyebrow">${entryEyebrow(entry)}</div>
         <h1>${esc(entry.title)}</h1>
         <p class="lead">${esc(entry.summary)}</p>
         <div class="lesson-meta">
@@ -94,15 +124,15 @@
 
           <nav class="lesson-nav" aria-label="Appendix navigation">
             <a href="${entry.relatedLesson.href}"><span class="kicker">Return to lesson</span>${esc(entry.relatedLesson.label)}</a>
-            <a href="#/appendix"><span class="kicker">Browse</span>All appendix explanations</a>
+            <a href="#/appendix"><span class="kicker">Browse</span>All appendix material</a>
           </nav>
         </article>
 
         <aside class="sidebar">
           <div class="card appendix-sidebar-card">
-            <h3>Appendix purpose</h3>
-            <p>Use these pages when a short lesson statement is correct but the reason is not yet intuitive.</p>
-            <a href="#/appendix">View all explanations</a>
+            <h3>${isCourseUnit(entry) ? "Stage 1 deeper study" : "Appendix purpose"}</h3>
+            <p>${isCourseUnit(entry) ? "Use these units when you want a fuller applied-mathematics treatment of the linear algebra behind Days 1–4." : "Use these pages when a short lesson statement is correct but the reason is not yet intuitive."}</p>
+            <a href="#/appendix">View all appendix material</a>
           </div>
         </aside>
       </div>`;
