@@ -10,13 +10,11 @@ const requiredFiles = [
   'appendix-linear-algebra-unit-1-depth-b.js',
   'appendix-linear-algebra-unit-1-refinements.js',
   'appendix-linear-algebra-unit-2.js',
-  'appendix-linear-algebra-unit-2-depth-a.js',
-  'appendix-linear-algebra-unit-2-depth-b.js',
   'appendix-linear-algebra-unit-2-refinements-a.js',
   'appendix-linear-algebra-unit-2-refinements-b.js',
   'appendix-linear-algebra-unit-3.js',
-  'appendix-linear-algebra-unit-3-depth-a.js',
-  'appendix-linear-algebra-unit-3-depth-b.js',
+  'appendix-linear-algebra-unit-3-refinements-a.js',
+  'appendix-linear-algebra-unit-3-refinements-b.js',
   'appendix-linear-algebra-course-metadata.js',
   'appendix-linear-algebra-strang-alignment.js'
 ];
@@ -25,6 +23,19 @@ for (const file of requiredFiles) {
   const fullPath = path.join(root, file);
   if (!fs.existsSync(fullPath)) {
     throw new Error(`Required appendix file is missing: ${file}`);
+  }
+}
+
+const removedDuplicateFiles = [
+  'appendix-linear-algebra-unit-2-depth-a.js',
+  'appendix-linear-algebra-unit-2-depth-b.js',
+  'appendix-linear-algebra-unit-3-depth-a.js',
+  'appendix-linear-algebra-unit-3-depth-b.js'
+];
+
+for (const file of removedDuplicateFiles) {
+  if (fs.existsSync(path.join(root, file))) {
+    throw new Error(`Superseded duplicate deep-dive file still exists: ${file}`);
   }
 }
 
@@ -101,8 +112,33 @@ for (const fragment of requiredUnit2Fragments) {
   }
 }
 
-if (!unit3.html.includes('id="strang-course-alignment-unit-3"')) {
-  throw new Error('Course-alignment marker is missing from Unit III.');
+const requiredUnit3Fragments = [
+  'id="strang-course-alignment-unit-3"',
+  'id="unit3-strang-refinement-a"',
+  'Why symmetric matrices are the best-behaved square matrices',
+  'Equivalent tests for positive definiteness',
+  'Cholesky factorization and positive pivots',
+  'Positive-definite matrices and quadratic minima',
+  'The Fourier matrix',
+  'Why the FFT reduces \\(O(N^2)\\) work to \\(O(N\\log N)\\)',
+  'Similar matrices represent the same transformation in different bases',
+  'Jordan form records the missing eigenvectors',
+  'id="unit3-strang-refinement-b"',
+  'The SVD extends the spectral theorem to every matrix',
+  'The SVD displays the four fundamental subspaces',
+  'Why truncated SVD is the best rank-\\(k\\) approximation',
+  'A linear transformation is determined by basis vectors',
+  'General change-of-basis formula',
+  'Left inverses and full column rank',
+  'Projection matrices from the pseudoinverse',
+  'Why \\(A^+b\\) is the least-squares solution',
+  'Why the pseudoinverse gives the minimum-norm solution'
+];
+
+for (const fragment of requiredUnit3Fragments) {
+  if (!unit3.html.includes(fragment)) {
+    throw new Error(`Unit III is missing expected content: ${fragment}`);
+  }
 }
 
 for (const unit of units) {
@@ -115,12 +151,20 @@ const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const requiredScripts = [
   'appendix-linear-algebra-unit-2-refinements-a.js',
   'appendix-linear-algebra-unit-2-refinements-b.js',
+  'appendix-linear-algebra-unit-3-refinements-a.js',
+  'appendix-linear-algebra-unit-3-refinements-b.js',
   'appendix-linear-algebra-strang-alignment.js'
 ];
 
 for (const script of requiredScripts) {
   if (!indexHtml.includes(`<script src="${script}"></script>`)) {
     throw new Error(`index.html does not load ${script}.`);
+  }
+}
+
+for (const script of removedDuplicateFiles) {
+  if (indexHtml.includes(`<script src="${script}"></script>`)) {
+    throw new Error(`index.html still loads superseded duplicate file ${script}.`);
   }
 }
 
