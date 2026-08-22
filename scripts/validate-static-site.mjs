@@ -12,6 +12,8 @@ const requiredFiles = [
   'appendix-linear-algebra-unit-2.js',
   'appendix-linear-algebra-unit-2-depth-a.js',
   'appendix-linear-algebra-unit-2-depth-b.js',
+  'appendix-linear-algebra-unit-2-refinements-a.js',
+  'appendix-linear-algebra-unit-2-refinements-b.js',
   'appendix-linear-algebra-unit-3.js',
   'appendix-linear-algebra-unit-3-depth-a.js',
   'appendix-linear-algebra-unit-3-depth-b.js',
@@ -75,13 +77,32 @@ for (const fragment of requiredUnit1Fragments) {
   }
 }
 
-for (const [unit, marker] of [
-  [unit2, 'id="strang-course-alignment-unit-2"'],
-  [unit3, 'id="strang-course-alignment-unit-3"']
-]) {
-  if (!unit.html.includes(marker)) {
-    throw new Error(`Course-alignment marker is missing: ${marker}`);
+const requiredUnit2Fragments = [
+  'id="strang-course-alignment-unit-2"',
+  'id="unit2-strang-refinement-a"',
+  'The main geometry of least squares',
+  'Nearest-point theorem',
+  'The projection matrix and its four key subspaces',
+  'Complete least-squares line fit',
+  'QR factorization from the column picture',
+  'id="unit2-strang-refinement-b"',
+  'Three properties determine the determinant',
+  'Cofactors and the adjugate identity',
+  'Trace and determinant summarize the eigenvalues',
+  'Difference equations and powers of \\(A\\)',
+  'A Fibonacci recurrence as a matrix power',
+  'Markov matrices and the eigenvalue \\(1\\)',
+  'Fourier series are projections in a function space'
+];
+
+for (const fragment of requiredUnit2Fragments) {
+  if (!unit2.html.includes(fragment)) {
+    throw new Error(`Unit II is missing expected content: ${fragment}`);
   }
+}
+
+if (!unit3.html.includes('id="strang-course-alignment-unit-3"')) {
+  throw new Error('Course-alignment marker is missing from Unit III.');
 }
 
 for (const unit of units) {
@@ -91,8 +112,16 @@ for (const unit of units) {
 }
 
 const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-if (!indexHtml.includes('<script src="appendix-linear-algebra-strang-alignment.js"></script>')) {
-  throw new Error('index.html does not load the Strang alignment file.');
+const requiredScripts = [
+  'appendix-linear-algebra-unit-2-refinements-a.js',
+  'appendix-linear-algebra-unit-2-refinements-b.js',
+  'appendix-linear-algebra-strang-alignment.js'
+];
+
+for (const script of requiredScripts) {
+  if (!indexHtml.includes(`<script src="${script}"></script>`)) {
+    throw new Error(`index.html does not load ${script}.`);
+  }
 }
 
 function count(text, token) {
