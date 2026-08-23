@@ -16,13 +16,17 @@ const requiredFiles = [
   'appendix-linear-algebra-unit-3-refinements-a.js',
   'appendix-linear-algebra-unit-3-refinements-b.js',
   'appendix-linear-algebra-course-metadata.js',
-  'appendix-linear-algebra-strang-alignment.js'
+  'appendix-linear-algebra-strang-alignment.js',
+  'day-16.js',
+  'day-16-sequence.js',
+  'day-16-attention.js',
+  'day-16-review.js'
 ];
 
 for (const file of requiredFiles) {
   const fullPath = path.join(root, file);
   if (!fs.existsSync(fullPath)) {
-    throw new Error(`Required appendix file is missing: ${file}`);
+    throw new Error(`Required file is missing: ${file}`);
   }
 }
 
@@ -39,6 +43,7 @@ for (const file of removedDuplicateFiles) {
   }
 }
 
+const appendixFiles = requiredFiles.filter(file => file.startsWith('appendix-'));
 const context = vm.createContext({
   window: {},
   console,
@@ -46,7 +51,7 @@ const context = vm.createContext({
   clearTimeout
 });
 
-for (const file of requiredFiles) {
+for (const file of appendixFiles) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
   vm.runInContext(source, context, { filename: file });
 }
@@ -149,6 +154,10 @@ for (const unit of units) {
 
 const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const requiredScripts = [
+  'day-16.js',
+  'day-16-sequence.js',
+  'day-16-attention.js',
+  'day-16-review.js',
   'appendix-linear-algebra-unit-2-refinements-a.js',
   'appendix-linear-algebra-unit-2-refinements-b.js',
   'appendix-linear-algebra-unit-3-refinements-a.js',
@@ -172,23 +181,147 @@ function count(text, token) {
   return text.split(token).length - 1;
 }
 
-for (const unit of units) {
+function validateBalancedMarkup(name, text) {
   for (const [open, close] of [['\\(', '\\)'], ['\\[', '\\]']]) {
-    const opens = count(unit.html, open);
-    const closes = count(unit.html, close);
+    const opens = count(text, open);
+    const closes = count(text, close);
     if (opens !== closes) {
-      throw new Error(`${unit.slug} has unbalanced MathJax delimiters ${open} and ${close}: ${opens} vs ${closes}`);
+      throw new Error(`${name} has unbalanced MathJax delimiters ${open} and ${close}: ${opens} vs ${closes}`);
     }
   }
 
-  const detailsOpen = count(unit.html, '<details>');
-  const detailsClose = count(unit.html, '</details>');
+  const detailsOpen = count(text, '<details>');
+  const detailsClose = count(text, '</details>');
   if (detailsOpen !== detailsClose) {
-    throw new Error(`${unit.slug} has unbalanced details elements: ${detailsOpen} vs ${detailsClose}`);
+    throw new Error(`${name} has unbalanced details elements: ${detailsOpen} vs ${detailsClose}`);
   }
 }
 
-console.log('Static appendix validation passed.');
+for (const unit of units) {
+  validateBalancedMarkup(unit.slug, unit.html);
+}
+
+// Assemble the daily course exactly in the order used by index.html.
+const courseContext = vm.createContext({ console, setTimeout, clearTimeout });
+const courseDataSource = fs.readFileSync(path.join(root, 'course-data.js'), 'utf8');
+vm.runInContext(courseDataSource, courseContext, { filename: 'course-data.js' });
+
+const dailyScripts = [...indexHtml.matchAll(/<script src="(day-[^"]+\.js)"><\/script>/g)]
+  .map(match => match[1]);
+
+for (const file of dailyScripts) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  vm.runInContext(source, courseContext, { filename: file });
+}
+
+const course = vm.runInContext('COURSE', courseContext);
+const flatCourse = course.flatMap(section => section.lessons);
+const publishedDays = flatCourse
+  .map((lesson, index) => ({ lesson, day: index + 1 }))
+  .filter(({ lesson }) => lesson.published === true);
+
+if (publishedDays.length !== 16) {
+  throw new Error(`Expected exactly 16 published daily lessons, found ${publishedDays.length}.`);
+}
+
+for (let index = 0; index < publishedDays.length; index += 1) {
+  const expectedDay = index + 1;
+  if (publishedDays[index].day !== expectedDay) {
+    throw new Error(`Published lessons are not contiguous. Expected Day ${expectedDay}, found Day ${publishedDays[index].day}.`);
+  }
+}
+
+const day16 = flatCourse[15];
+if (!day16 || day16.title !== 'Language Models, Embeddings, and Attention') {
+  throw new Error('Day 16 does not resolve to Language Models, Embeddings, and Attention.');
+}
+if (day16.published !== true) {
+  throw new Error('Day 16 is not marked published.');
+}
+if (flatCourse[16]?.published === true) {
+  throw new Error('Day 17 is unexpectedly marked published.');
+}
+
+const expectedSectionIds = [
+  'tokens-and-probability',
+  'autoregressive-factorization',
+  'softmax-loss-perplexity',
+  'embeddings',
+  'distributional-semantics',
+  'word2vec-objectives',
+  'recurrent-states',
+  'bptt',
+  'encoder-decoder',
+  'qkv-projections',
+  'scaled-dot-product-attention',
+  'causal-masks',
+  'multi-head-attention',
+  'positional-information',
+  'residuals-and-layernorm',
+  'training-objectives',
+  'common-mistakes',
+  'paper-reading-workflow',
+  'day16-recap'
+];
+
+const sectionIds = new Set((day16.sections || []).map(section => section.id));
+for (const id of expectedSectionIds) {
+  if (!sectionIds.has(id)) {
+    throw new Error(`Day 16 is missing required section: ${id}`);
+  }
+}
+
+const expectedTopics = [
+  'Autoregressive factorization',
+  'Cross-entropy and perplexity',
+  'Sparse embedding gradients',
+  'Negative sampling',
+  'Noise-contrastive estimation',
+  'Hierarchical softmax',
+  'Backpropagation through time',
+  'Query/key/value projections',
+  'Scaled dot-product attention',
+  'Causal masks',
+  'Multi-head attention',
+  'Positional encodings',
+  'Residual paths',
+  'Layer normalization',
+  'Token-level and sequence-level objectives'
+];
+
+for (const topic of expectedTopics) {
+  if (!day16.topics.includes(topic)) {
+    throw new Error(`Day 16 topic list is missing: ${topic}`);
+  }
+}
+
+const day16Markup = [
+  day16.explanation || '',
+  ...(day16.sections || []).map(section => section.html || ''),
+  ...(day16.examples || []).flatMap(example => example),
+  ...(day16.practice || [])
+].join('\n');
+validateBalancedMarkup('Day 16', day16Markup);
+
+if ((day16.practice || []).length < 12) {
+  throw new Error(`Day 16 needs substantial practice coverage; found ${(day16.practice || []).length} questions.`);
+}
+
+const studyText = (day16.sections || [])
+  .map(section => section.html || '')
+  .join(' ')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/\\[\[(].*?\\[\])]/gs, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+const approximateWords = studyText ? studyText.split(' ').length : 0;
+if (approximateWords < 2500) {
+  throw new Error(`Day 16 is too short for a complete chapter: approximately ${approximateWords} prose words.`);
+}
+
+console.log('Static site validation passed.');
+console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 17.`);
+console.log(`Day 16: ${day16.sections.length} sections; ${day16.practice.length} practice questions; approximately ${approximateWords} prose words.`);
 for (const unit of units) {
   console.log(`${unit.shortTitle}: ${unit.html.length.toLocaleString()} characters; ${count(unit.html, '<details>')} expandable solutions`);
 }
