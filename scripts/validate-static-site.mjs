@@ -3,7 +3,8 @@ import path from 'node:path';
 import vm from 'node:vm';
 
 const root = process.cwd();
-const requiredFiles = [
+
+const appendixFiles = [
   'appendix-data.js',
   'appendix-linear-algebra-unit-1.js',
   'appendix-linear-algebra-unit-1-depth-a.js',
@@ -16,16 +17,23 @@ const requiredFiles = [
   'appendix-linear-algebra-unit-3-refinements-a.js',
   'appendix-linear-algebra-unit-3-refinements-b.js',
   'appendix-linear-algebra-course-metadata.js',
-  'appendix-linear-algebra-strang-alignment.js',
+  'appendix-linear-algebra-strang-alignment.js'
+];
+
+const lessonFiles = [
   'day-16.js',
   'day-16-sequence.js',
   'day-16-attention.js',
-  'day-16-review.js'
+  'day-16-review.js',
+  'day-17.js',
+  'day-17-spatial.js',
+  'day-17-frequency.js',
+  'day-17-review.js'
 ];
 
+const requiredFiles = [...appendixFiles, ...lessonFiles];
 for (const file of requiredFiles) {
-  const fullPath = path.join(root, file);
-  if (!fs.existsSync(fullPath)) {
+  if (!fs.existsSync(path.join(root, file))) {
     throw new Error(`Required file is missing: ${file}`);
   }
 }
@@ -36,27 +44,107 @@ const removedDuplicateFiles = [
   'appendix-linear-algebra-unit-3-depth-a.js',
   'appendix-linear-algebra-unit-3-depth-b.js'
 ];
-
 for (const file of removedDuplicateFiles) {
   if (fs.existsSync(path.join(root, file))) {
     throw new Error(`Superseded duplicate deep-dive file still exists: ${file}`);
   }
 }
 
-const appendixFiles = requiredFiles.filter(file => file.startsWith('appendix-'));
-const context = vm.createContext({
+function count(text, token) {
+  return text.split(token).length - 1;
+}
+
+function validateBalancedMarkup(name, text) {
+  for (const [open, close] of [['\\(', '\\)'], ['\\[', '\\]']]) {
+    const opens = count(text, open);
+    const closes = count(text, close);
+    if (opens !== closes) {
+      throw new Error(`${name} has unbalanced MathJax delimiters ${open} and ${close}: ${opens} vs ${closes}`);
+    }
+  }
+
+  const detailsOpen = count(text, '<details>');
+  const detailsClose = count(text, '</details>');
+  if (detailsOpen !== detailsClose) {
+    throw new Error(`${name} has unbalanced details elements: ${detailsOpen} vs ${detailsClose}`);
+  }
+}
+
+function lessonMarkup(lesson) {
+  return [
+    lesson.explanation || '',
+    ...(lesson.sections || []).map(section => section.html || ''),
+    ...(lesson.examples || []).flatMap(example => example),
+    ...(lesson.practice || [])
+  ].join('\n');
+}
+
+function approximateProseWords(lesson) {
+  const studyText = (lesson.sections || [])
+    .map(section => section.html || '')
+    .join(' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\\[\[(].*?\\[\])]/gs, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return studyText ? studyText.split(' ').length : 0;
+}
+
+function validateLesson({
+  day,
+  lesson,
+  title,
+  sectionIds,
+  topics,
+  minimumPractice = 12,
+  minimumWords = 2500
+}) {
+  if (!lesson || lesson.title !== title) {
+    throw new Error(`Day ${day} does not resolve to ${title}.`);
+  }
+  if (lesson.published !== true) {
+    throw new Error(`Day ${day} is not marked published.`);
+  }
+
+  const actualSectionIds = new Set((lesson.sections || []).map(section => section.id));
+  for (const id of sectionIds) {
+    if (!actualSectionIds.has(id)) {
+      throw new Error(`Day ${day} is missing required section: ${id}`);
+    }
+  }
+
+  for (const topic of topics) {
+    if (!(lesson.topics || []).includes(topic)) {
+      throw new Error(`Day ${day} topic list is missing: ${topic}`);
+    }
+  }
+
+  validateBalancedMarkup(`Day ${day}`, lessonMarkup(lesson));
+
+  if ((lesson.practice || []).length < minimumPractice) {
+    throw new Error(`Day ${day} needs substantial practice coverage; found ${(lesson.practice || []).length} questions.`);
+  }
+
+  const words = approximateProseWords(lesson);
+  if (words < minimumWords) {
+    throw new Error(`Day ${day} is too short for a complete chapter: approximately ${words} prose words.`);
+  }
+
+  return words;
+}
+
+// Validate the assembled linear-algebra appendix.
+const appendixContext = vm.createContext({
   window: {},
   console,
   setTimeout,
   clearTimeout
 });
-
 for (const file of appendixFiles) {
-  const source = fs.readFileSync(path.join(root, file), 'utf8');
-  vm.runInContext(source, context, { filename: file });
+  vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), appendixContext, { filename: file });
 }
 
-const entries = context.window.MATH_APPENDIX;
+const entries = appendixContext.window.MATH_APPENDIX;
 if (!Array.isArray(entries)) {
   throw new Error('window.MATH_APPENDIX was not assembled as an array.');
 }
@@ -66,7 +154,6 @@ const units = [1, 2, 3].map(number => {
   if (!unit) throw new Error(`Applied Linear Algebra Unit ${number} was not assembled.`);
   return unit;
 });
-
 const [unit1, unit2, unit3] = units;
 
 const requiredUnit1Fragments = [
@@ -87,12 +174,6 @@ const requiredUnit1Fragments = [
   'Outer-product view'
 ];
 
-for (const fragment of requiredUnit1Fragments) {
-  if (!unit1.html.includes(fragment)) {
-    throw new Error(`Unit I is missing expected content: ${fragment}`);
-  }
-}
-
 const requiredUnit2Fragments = [
   'id="strang-course-alignment-unit-2"',
   'id="unit2-strang-refinement-a"',
@@ -110,12 +191,6 @@ const requiredUnit2Fragments = [
   'Markov matrices and the eigenvalue \\(1\\)',
   'Fourier series are projections in a function space'
 ];
-
-for (const fragment of requiredUnit2Fragments) {
-  if (!unit2.html.includes(fragment)) {
-    throw new Error(`Unit II is missing expected content: ${fragment}`);
-  }
-}
 
 const requiredUnit3Fragments = [
   'id="strang-course-alignment-unit-3"',
@@ -140,78 +215,54 @@ const requiredUnit3Fragments = [
   'Why the pseudoinverse gives the minimum-norm solution'
 ];
 
-for (const fragment of requiredUnit3Fragments) {
-  if (!unit3.html.includes(fragment)) {
-    throw new Error(`Unit III is missing expected content: ${fragment}`);
+for (const [unit, fragments] of [
+  [unit1, requiredUnit1Fragments],
+  [unit2, requiredUnit2Fragments],
+  [unit3, requiredUnit3Fragments]
+]) {
+  for (const fragment of fragments) {
+    if (!unit.html.includes(fragment)) {
+      throw new Error(`${unit.slug} is missing expected content: ${fragment}`);
+    }
   }
-}
-
-for (const unit of units) {
   if (!unit.tags?.includes('18.06SC-aligned')) {
     throw new Error(`${unit.slug} is missing the 18.06SC-aligned tag.`);
   }
+  validateBalancedMarkup(unit.slug, unit.html);
 }
 
+// Validate script load order and the assembled daily course.
 const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const requiredScripts = [
-  'day-16.js',
-  'day-16-sequence.js',
-  'day-16-attention.js',
-  'day-16-review.js',
+  ...lessonFiles,
   'appendix-linear-algebra-unit-2-refinements-a.js',
   'appendix-linear-algebra-unit-2-refinements-b.js',
   'appendix-linear-algebra-unit-3-refinements-a.js',
   'appendix-linear-algebra-unit-3-refinements-b.js',
   'appendix-linear-algebra-strang-alignment.js'
 ];
-
 for (const script of requiredScripts) {
   if (!indexHtml.includes(`<script src="${script}"></script>`)) {
     throw new Error(`index.html does not load ${script}.`);
   }
 }
-
 for (const script of removedDuplicateFiles) {
   if (indexHtml.includes(`<script src="${script}"></script>`)) {
     throw new Error(`index.html still loads superseded duplicate file ${script}.`);
   }
 }
 
-function count(text, token) {
-  return text.split(token).length - 1;
-}
-
-function validateBalancedMarkup(name, text) {
-  for (const [open, close] of [['\\(', '\\)'], ['\\[', '\\]']]) {
-    const opens = count(text, open);
-    const closes = count(text, close);
-    if (opens !== closes) {
-      throw new Error(`${name} has unbalanced MathJax delimiters ${open} and ${close}: ${opens} vs ${closes}`);
-    }
-  }
-
-  const detailsOpen = count(text, '<details>');
-  const detailsClose = count(text, '</details>');
-  if (detailsOpen !== detailsClose) {
-    throw new Error(`${name} has unbalanced details elements: ${detailsOpen} vs ${detailsClose}`);
-  }
-}
-
-for (const unit of units) {
-  validateBalancedMarkup(unit.slug, unit.html);
-}
-
-// Assemble the daily course exactly in the order used by index.html.
 const courseContext = vm.createContext({ console, setTimeout, clearTimeout });
-const courseDataSource = fs.readFileSync(path.join(root, 'course-data.js'), 'utf8');
-vm.runInContext(courseDataSource, courseContext, { filename: 'course-data.js' });
+vm.runInContext(fs.readFileSync(path.join(root, 'course-data.js'), 'utf8'), courseContext, { filename: 'course-data.js' });
 
 const dailyScripts = [...indexHtml.matchAll(/<script src="(day-[^"]+\.js)"><\/script>/g)]
   .map(match => match[1]);
-
 for (const file of dailyScripts) {
-  const source = fs.readFileSync(path.join(root, file), 'utf8');
-  vm.runInContext(source, courseContext, { filename: file });
+  const fullPath = path.join(root, file);
+  if (!fs.existsSync(fullPath)) {
+    throw new Error(`index.html references missing daily script: ${file}`);
+  }
+  vm.runInContext(fs.readFileSync(fullPath, 'utf8'), courseContext, { filename: file });
 }
 
 const course = vm.runInContext('COURSE', courseContext);
@@ -220,108 +271,113 @@ const publishedDays = flatCourse
   .map((lesson, index) => ({ lesson, day: index + 1 }))
   .filter(({ lesson }) => lesson.published === true);
 
-if (publishedDays.length !== 16) {
-  throw new Error(`Expected exactly 16 published daily lessons, found ${publishedDays.length}.`);
+if (publishedDays.length !== 17) {
+  throw new Error(`Expected exactly 17 published daily lessons, found ${publishedDays.length}.`);
 }
-
 for (let index = 0; index < publishedDays.length; index += 1) {
   const expectedDay = index + 1;
   if (publishedDays[index].day !== expectedDay) {
     throw new Error(`Published lessons are not contiguous. Expected Day ${expectedDay}, found Day ${publishedDays[index].day}.`);
   }
 }
+if (flatCourse[17]?.published === true) {
+  throw new Error('Day 18 is unexpectedly marked published.');
+}
 
 const day16 = flatCourse[15];
-if (!day16 || day16.title !== 'Language Models, Embeddings, and Attention') {
-  throw new Error('Day 16 does not resolve to Language Models, Embeddings, and Attention.');
-}
-if (day16.published !== true) {
-  throw new Error('Day 16 is not marked published.');
-}
-if (flatCourse[16]?.published === true) {
-  throw new Error('Day 17 is unexpectedly marked published.');
-}
+const day16Words = validateLesson({
+  day: 16,
+  lesson: day16,
+  title: 'Language Models, Embeddings, and Attention',
+  sectionIds: [
+    'tokens-and-probability',
+    'autoregressive-factorization',
+    'softmax-loss-perplexity',
+    'embeddings',
+    'distributional-semantics',
+    'word2vec-objectives',
+    'recurrent-states',
+    'bptt',
+    'encoder-decoder',
+    'qkv-projections',
+    'scaled-dot-product-attention',
+    'causal-masks',
+    'multi-head-attention',
+    'positional-information',
+    'residuals-and-layernorm',
+    'training-objectives',
+    'common-mistakes',
+    'paper-reading-workflow',
+    'day16-recap'
+  ],
+  topics: [
+    'Autoregressive factorization',
+    'Cross-entropy and perplexity',
+    'Sparse embedding gradients',
+    'Negative sampling',
+    'Noise-contrastive estimation',
+    'Hierarchical softmax',
+    'Backpropagation through time',
+    'Query/key/value projections',
+    'Scaled dot-product attention',
+    'Causal masks',
+    'Multi-head attention',
+    'Positional encodings',
+    'Residual paths',
+    'Layer normalization',
+    'Token-level and sequence-level objectives'
+  ]
+});
 
-const expectedSectionIds = [
-  'tokens-and-probability',
-  'autoregressive-factorization',
-  'softmax-loss-perplexity',
-  'embeddings',
-  'distributional-semantics',
-  'word2vec-objectives',
-  'recurrent-states',
-  'bptt',
-  'encoder-decoder',
-  'qkv-projections',
-  'scaled-dot-product-attention',
-  'causal-masks',
-  'multi-head-attention',
-  'positional-information',
-  'residuals-and-layernorm',
-  'training-objectives',
-  'common-mistakes',
-  'paper-reading-workflow',
-  'day16-recap'
-];
-
-const sectionIds = new Set((day16.sections || []).map(section => section.id));
-for (const id of expectedSectionIds) {
-  if (!sectionIds.has(id)) {
-    throw new Error(`Day 16 is missing required section: ${id}`);
-  }
-}
-
-const expectedTopics = [
-  'Autoregressive factorization',
-  'Cross-entropy and perplexity',
-  'Sparse embedding gradients',
-  'Negative sampling',
-  'Noise-contrastive estimation',
-  'Hierarchical softmax',
-  'Backpropagation through time',
-  'Query/key/value projections',
-  'Scaled dot-product attention',
-  'Causal masks',
-  'Multi-head attention',
-  'Positional encodings',
-  'Residual paths',
-  'Layer normalization',
-  'Token-level and sequence-level objectives'
-];
-
-for (const topic of expectedTopics) {
-  if (!day16.topics.includes(topic)) {
-    throw new Error(`Day 16 topic list is missing: ${topic}`);
-  }
-}
-
-const day16Markup = [
-  day16.explanation || '',
-  ...(day16.sections || []).map(section => section.html || ''),
-  ...(day16.examples || []).flatMap(example => example),
-  ...(day16.practice || [])
-].join('\n');
-validateBalancedMarkup('Day 16', day16Markup);
-
-if ((day16.practice || []).length < 12) {
-  throw new Error(`Day 16 needs substantial practice coverage; found ${(day16.practice || []).length} questions.`);
-}
-
-const studyText = (day16.sections || [])
-  .map(section => section.html || '')
-  .join(' ')
-  .replace(/<[^>]+>/g, ' ')
-  .replace(/\\[\[(].*?\\[\])]/gs, ' ')
-  .replace(/\s+/g, ' ')
-  .trim();
-const approximateWords = studyText ? studyText.split(' ').length : 0;
-if (approximateWords < 2500) {
-  throw new Error(`Day 16 is too short for a complete chapter: approximately ${approximateWords} prose words.`);
-}
+const day17 = flatCourse[16];
+const day17Words = validateLesson({
+  day: 17,
+  lesson: day17,
+  title: 'Convolution and Signal Processing',
+  sectionIds: [
+    'discrete-signals',
+    'cross-correlation',
+    'convolution',
+    'kernels-filters',
+    'padding-stride-dilation',
+    'channels',
+    'receptive-fields',
+    'pooling',
+    'translation-equivariance',
+    'toeplitz-view',
+    'fourier-transform',
+    'frequency-domain-intuition',
+    'aliasing-downsampling',
+    'cnn-frequency-reading',
+    'convolution-gradients',
+    'common-mistakes',
+    'paper-reading-workflow',
+    'day17-recap'
+  ],
+  topics: [
+    'Discrete signals',
+    'Convolution',
+    'Cross-correlation',
+    'Kernels and filters',
+    'Padding, stride, and dilation',
+    'Channels',
+    'Receptive fields',
+    'Pooling',
+    'Translation equivariance',
+    'Toeplitz view',
+    'Fourier transform',
+    'Frequency-domain intuition',
+    'Aliasing and downsampling',
+    'Convolution gradients'
+  ],
+  minimumPractice: 15,
+  minimumWords: 2500
+});
 
 console.log('Static site validation passed.');
-console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 17.`);
-console.log(`Day 16: ${day16.sections.length} sections; ${day16.practice.length} practice questions; approximately ${approximateWords} prose words.`);
+console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 18.`);
+console.log(`Day 16: ${day16.sections.length} sections; ${day16.practice.length} practice questions; approximately ${day16Words} prose words.`);
+console.log(`Day 17: ${day17.sections.length} sections; ${day17.practice.length} practice questions; approximately ${day17Words} prose words.`);
 for (const unit of units) {
   console.log(`${unit.shortTitle}: ${unit.html.length.toLocaleString()} characters; ${count(unit.html, '<details>')} expandable solutions`);
 }
