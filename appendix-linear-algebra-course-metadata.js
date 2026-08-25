@@ -21,4 +21,16 @@
     const entry = window.MATH_APPENDIX?.find(item => item.slug === metadata.slug);
     if (entry) Object.assign(entry, metadata);
   }
+
+  // A row break immediately followed by [T(b_1)] can be parsed as the optional
+  // spacing form of \\ inside a bmatrix and can also look like a display-math
+  // opener to delimiter validation. Separate the row break from the bracketed
+  // coordinate vector without changing the mathematical content.
+  const unit3 = window.MATH_APPENDIX?.find(item => item.slug === "applied-linear-algebra-unit-3");
+  if (unit3) {
+    unit3.html = unit3.html.replace(
+      String.raw`\\\\[T(b_1)]_C`,
+      String.raw`\\\\{}[T(b_1)]_C`
+    );
+  }
 })();
