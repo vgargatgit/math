@@ -28,7 +28,11 @@ const lessonFiles = [
   'day-17.js',
   'day-17-spatial.js',
   'day-17-frequency.js',
-  'day-17-review.js'
+  'day-17-review.js',
+  'day-18.js',
+  'day-18-graphs.js',
+  'day-18-geometry.js',
+  'day-18-review.js'
 ];
 
 const requiredFiles = [...appendixFiles, ...lessonFiles];
@@ -271,8 +275,8 @@ const publishedDays = flatCourse
   .map((lesson, index) => ({ lesson, day: index + 1 }))
   .filter(({ lesson }) => lesson.published === true);
 
-if (publishedDays.length !== 17) {
-  throw new Error(`Expected exactly 17 published daily lessons, found ${publishedDays.length}.`);
+if (publishedDays.length !== 18) {
+  throw new Error(`Expected exactly 18 published daily lessons, found ${publishedDays.length}.`);
 }
 for (let index = 0; index < publishedDays.length; index += 1) {
   const expectedDay = index + 1;
@@ -280,8 +284,8 @@ for (let index = 0; index < publishedDays.length; index += 1) {
     throw new Error(`Published lessons are not contiguous. Expected Day ${expectedDay}, found Day ${publishedDays[index].day}.`);
   }
 }
-if (flatCourse[17]?.published === true) {
-  throw new Error('Day 18 is unexpectedly marked published.');
+if (flatCourse[18]?.published === true) {
+  throw new Error('Day 19 is unexpectedly marked published.');
 }
 
 const day16 = flatCourse[15];
@@ -374,10 +378,67 @@ const day17Words = validateLesson({
   minimumWords: 2500
 });
 
+const day18 = flatCourse[17];
+const day18Words = validateLesson({
+  day: 18,
+  lesson: day18,
+  title: 'Sets, Graphs, and Geometric Deep Learning',
+  sectionIds: [
+    'permutations',
+    'invariance-equivariance',
+    'symmetry-groups',
+    'deep-sets',
+    'graphs-matrices',
+    'graph-laplacian',
+    'graph-spectra',
+    'message-passing',
+    'graph-convolution',
+    'graph-attention',
+    'graph-isomorphism',
+    'manifolds',
+    'tangent-spaces',
+    'geodesics',
+    'local-coordinates',
+    'transformation-groups',
+    'group-representations',
+    'gauge-intuition',
+    'common-mistakes',
+    'paper-reading-workflow',
+    'day18-recap'
+  ],
+  topics: [
+    'Permutations',
+    'Permutation invariance and equivariance',
+    'Symmetry',
+    'Group actions',
+    'Invariant and equivariant functions',
+    'Set-function forms',
+    'Graphs',
+    'Adjacency and degree matrices',
+    'Graph Laplacians',
+    'Graph spectra',
+    'Neighborhood aggregation',
+    'Message passing',
+    'Graph convolution',
+    'Graph attention',
+    'Isomorphism intuition',
+    'Manifolds',
+    'Tangent spaces',
+    'Geodesic distance',
+    'Local coordinates',
+    'Transformation groups',
+    'Representations of symmetry groups',
+    'Gauge intuition'
+  ],
+  minimumPractice: 18,
+  minimumWords: 3000
+});
+
 console.log('Static site validation passed.');
-console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 18.`);
+console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 19.`);
 console.log(`Day 16: ${day16.sections.length} sections; ${day16.practice.length} practice questions; approximately ${day16Words} prose words.`);
 console.log(`Day 17: ${day17.sections.length} sections; ${day17.practice.length} practice questions; approximately ${day17Words} prose words.`);
+console.log(`Day 18: ${day18.sections.length} sections; ${day18.practice.length} practice questions; approximately ${day18Words} prose words.`);
 for (const unit of units) {
   console.log(`${unit.shortTitle}: ${unit.html.length.toLocaleString()} characters; ${count(unit.html, '<details>')} expandable solutions`);
 }
