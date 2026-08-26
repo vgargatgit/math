@@ -32,7 +32,11 @@ const lessonFiles = [
   'day-18.js',
   'day-18-graphs.js',
   'day-18-geometry.js',
-  'day-18-review.js'
+  'day-18-review.js',
+  'day-19.js',
+  'day-19-variational.js',
+  'day-19-generative.js',
+  'day-19-diffusion-review.js'
 ];
 
 const requiredFiles = [...appendixFiles, ...lessonFiles];
@@ -275,8 +279,8 @@ const publishedDays = flatCourse
   .map((lesson, index) => ({ lesson, day: index + 1 }))
   .filter(({ lesson }) => lesson.published === true);
 
-if (publishedDays.length !== 18) {
-  throw new Error(`Expected exactly 18 published daily lessons, found ${publishedDays.length}.`);
+if (publishedDays.length !== 19) {
+  throw new Error(`Expected exactly 19 published daily lessons, found ${publishedDays.length}.`);
 }
 for (let index = 0; index < publishedDays.length; index += 1) {
   const expectedDay = index + 1;
@@ -284,8 +288,8 @@ for (let index = 0; index < publishedDays.length; index += 1) {
     throw new Error(`Published lessons are not contiguous. Expected Day ${expectedDay}, found Day ${publishedDays[index].day}.`);
   }
 }
-if (flatCourse[18]?.published === true) {
-  throw new Error('Day 19 is unexpectedly marked published.');
+if (flatCourse[19]?.published === true) {
+  throw new Error('Day 20 is unexpectedly marked published.');
 }
 
 const day16 = flatCourse[15];
@@ -294,42 +298,19 @@ const day16Words = validateLesson({
   lesson: day16,
   title: 'Language Models, Embeddings, and Attention',
   sectionIds: [
-    'tokens-and-probability',
-    'autoregressive-factorization',
-    'softmax-loss-perplexity',
-    'embeddings',
-    'distributional-semantics',
-    'word2vec-objectives',
-    'recurrent-states',
-    'bptt',
-    'encoder-decoder',
-    'qkv-projections',
-    'scaled-dot-product-attention',
-    'causal-masks',
-    'multi-head-attention',
-    'positional-information',
-    'residuals-and-layernorm',
-    'training-objectives',
-    'common-mistakes',
-    'paper-reading-workflow',
-    'day16-recap'
+    'tokens-and-probability', 'autoregressive-factorization', 'softmax-loss-perplexity',
+    'embeddings', 'distributional-semantics', 'word2vec-objectives', 'recurrent-states',
+    'bptt', 'encoder-decoder', 'qkv-projections', 'scaled-dot-product-attention',
+    'causal-masks', 'multi-head-attention', 'positional-information',
+    'residuals-and-layernorm', 'training-objectives', 'common-mistakes',
+    'paper-reading-workflow', 'day16-recap'
   ],
   topics: [
-    'Autoregressive factorization',
-    'Cross-entropy and perplexity',
-    'Sparse embedding gradients',
-    'Negative sampling',
-    'Noise-contrastive estimation',
-    'Hierarchical softmax',
-    'Backpropagation through time',
-    'Query/key/value projections',
-    'Scaled dot-product attention',
-    'Causal masks',
-    'Multi-head attention',
-    'Positional encodings',
-    'Residual paths',
-    'Layer normalization',
-    'Token-level and sequence-level objectives'
+    'Autoregressive factorization', 'Cross-entropy and perplexity', 'Sparse embedding gradients',
+    'Negative sampling', 'Noise-contrastive estimation', 'Hierarchical softmax',
+    'Backpropagation through time', 'Query/key/value projections', 'Scaled dot-product attention',
+    'Causal masks', 'Multi-head attention', 'Positional encodings', 'Residual paths',
+    'Layer normalization', 'Token-level and sequence-level objectives'
   ]
 });
 
@@ -339,40 +320,17 @@ const day17Words = validateLesson({
   lesson: day17,
   title: 'Convolution and Signal Processing',
   sectionIds: [
-    'discrete-signals',
-    'cross-correlation',
-    'convolution',
-    'kernels-filters',
-    'padding-stride-dilation',
-    'channels',
-    'receptive-fields',
-    'pooling',
-    'translation-equivariance',
-    'toeplitz-view',
-    'fourier-transform',
-    'frequency-domain-intuition',
-    'aliasing-downsampling',
-    'cnn-frequency-reading',
-    'convolution-gradients',
-    'common-mistakes',
-    'paper-reading-workflow',
-    'day17-recap'
+    'discrete-signals', 'cross-correlation', 'convolution', 'kernels-filters',
+    'padding-stride-dilation', 'channels', 'receptive-fields', 'pooling',
+    'translation-equivariance', 'toeplitz-view', 'fourier-transform',
+    'frequency-domain-intuition', 'aliasing-downsampling', 'cnn-frequency-reading',
+    'convolution-gradients', 'common-mistakes', 'paper-reading-workflow', 'day17-recap'
   ],
   topics: [
-    'Discrete signals',
-    'Convolution',
-    'Cross-correlation',
-    'Kernels and filters',
-    'Padding, stride, and dilation',
-    'Channels',
-    'Receptive fields',
-    'Pooling',
-    'Translation equivariance',
-    'Toeplitz view',
-    'Fourier transform',
-    'Frequency-domain intuition',
-    'Aliasing and downsampling',
-    'Convolution gradients'
+    'Discrete signals', 'Convolution', 'Cross-correlation', 'Kernels and filters',
+    'Padding, stride, and dilation', 'Channels', 'Receptive fields', 'Pooling',
+    'Translation equivariance', 'Toeplitz view', 'Fourier transform',
+    'Frequency-domain intuition', 'Aliasing and downsampling', 'Convolution gradients'
   ],
   minimumPractice: 15,
   minimumWords: 2500
@@ -384,61 +342,57 @@ const day18Words = validateLesson({
   lesson: day18,
   title: 'Sets, Graphs, and Geometric Deep Learning',
   sectionIds: [
-    'permutations',
-    'invariance-equivariance',
-    'symmetry-groups',
-    'deep-sets',
-    'graphs-matrices',
-    'graph-laplacian',
-    'graph-spectra',
-    'message-passing',
-    'graph-convolution',
-    'graph-attention',
-    'graph-isomorphism',
-    'manifolds',
-    'tangent-spaces',
-    'geodesics',
-    'local-coordinates',
-    'transformation-groups',
-    'group-representations',
-    'gauge-intuition',
-    'common-mistakes',
-    'paper-reading-workflow',
-    'day18-recap'
+    'permutations', 'invariance-equivariance', 'symmetry-groups', 'deep-sets',
+    'graphs-matrices', 'graph-laplacian', 'graph-spectra', 'message-passing',
+    'graph-convolution', 'graph-attention', 'graph-isomorphism', 'manifolds',
+    'tangent-spaces', 'geodesics', 'local-coordinates', 'transformation-groups',
+    'group-representations', 'gauge-intuition', 'common-mistakes',
+    'paper-reading-workflow', 'day18-recap'
   ],
   topics: [
-    'Permutations',
-    'Permutation invariance and equivariance',
-    'Symmetry',
-    'Group actions',
-    'Invariant and equivariant functions',
-    'Set-function forms',
-    'Graphs',
-    'Adjacency and degree matrices',
-    'Graph Laplacians',
-    'Graph spectra',
-    'Neighborhood aggregation',
-    'Message passing',
-    'Graph convolution',
-    'Graph attention',
-    'Isomorphism intuition',
-    'Manifolds',
-    'Tangent spaces',
-    'Geodesic distance',
-    'Local coordinates',
-    'Transformation groups',
-    'Representations of symmetry groups',
+    'Permutations', 'Permutation invariance and equivariance', 'Symmetry', 'Group actions',
+    'Invariant and equivariant functions', 'Set-function forms', 'Graphs',
+    'Adjacency and degree matrices', 'Graph Laplacians', 'Graph spectra',
+    'Neighborhood aggregation', 'Message passing', 'Graph convolution', 'Graph attention',
+    'Isomorphism intuition', 'Manifolds', 'Tangent spaces', 'Geodesic distance',
+    'Local coordinates', 'Transformation groups', 'Representations of symmetry groups',
     'Gauge intuition'
   ],
   minimumPractice: 18,
   minimumWords: 3000
 });
 
+const day19 = flatCourse[18];
+const day19Words = validateLesson({
+  day: 19,
+  lesson: day19,
+  title: 'Latent-Variable and Generative Models',
+  sectionIds: [
+    'latent-variables', 'marginalization', 'posterior-inference', 'jensen', 'elbo',
+    'variational-inference', 'reparameterization', 'monte-carlo-gradients',
+    'importance-sampling', 'change-of-variables', 'normalizing-flows',
+    'minimax-optimization', 'game-equilibrium', 'gan-objectives', 'score-functions',
+    'denoising-objectives', 'markov-noise-processes', 'sde-intuition',
+    'common-mistakes', 'paper-reading-workflow', 'day19-recap'
+  ],
+  topics: [
+    'Latent variables', 'Marginalization', 'Posterior inference', 'Jensen’s inequality',
+    'ELBO', 'Variational inference', 'Reparameterization', 'Monte Carlo gradients',
+    'Importance sampling', 'Change of variables', 'Jacobian determinant',
+    'Normalizing flows', 'Minimax optimization', 'Game-theoretic equilibrium',
+    'GAN objectives', 'Score functions', 'Denoising objectives',
+    'Markov noise processes', 'SDE intuition'
+  ],
+  minimumPractice: 20,
+  minimumWords: 3500
+});
+
 console.log('Static site validation passed.');
-console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 19.`);
+console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 20.`);
 console.log(`Day 16: ${day16.sections.length} sections; ${day16.practice.length} practice questions; approximately ${day16Words} prose words.`);
 console.log(`Day 17: ${day17.sections.length} sections; ${day17.practice.length} practice questions; approximately ${day17Words} prose words.`);
 console.log(`Day 18: ${day18.sections.length} sections; ${day18.practice.length} practice questions; approximately ${day18Words} prose words.`);
+console.log(`Day 19: ${day19.sections.length} sections; ${day19.practice.length} practice questions; approximately ${day19Words} prose words.`);
 for (const unit of units) {
   console.log(`${unit.shortTitle}: ${unit.html.length.toLocaleString()} characters; ${count(unit.html, '<details>')} expandable solutions`);
 }
