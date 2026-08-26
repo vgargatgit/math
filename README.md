@@ -5,9 +5,10 @@ A static, paper-oriented mathematics course for AI/ML.
 ## What is included
 
 - One routed lesson page per day/topic.
-- 22 lessons: the 15-module core, six specialist tracks, and a paper-reading practicum.
-- Three worked examples per lesson.
-- Practice questions on every lesson page.
+- 22 planned lessons: the 15-module core, six specialist tracks, and a paper-reading practicum.
+- Days 1-19 are complete teaching chapters and are published contiguously.
+- Worked numerical examples and shape reasoning throughout the course.
+- Practice questions with answers on every published lesson page.
 - MathJax 3 with the TeX-to-SVG renderer for mathematical notation.
 - Responsive layout with no build step.
 
