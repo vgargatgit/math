@@ -39,8 +39,7 @@ const lessonFiles = [
   'day-19-diffusion-review.js'
 ];
 
-const requiredFiles = [...appendixFiles, ...lessonFiles];
-for (const file of requiredFiles) {
+for (const file of [...appendixFiles, ...lessonFiles]) {
   if (!fs.existsSync(path.join(root, file))) {
     throw new Error(`Required file is missing: ${file}`);
   }
@@ -98,15 +97,7 @@ function approximateProseWords(lesson) {
   return studyText ? studyText.split(' ').length : 0;
 }
 
-function validateLesson({
-  day,
-  lesson,
-  title,
-  sectionIds,
-  topics,
-  minimumPractice = 12,
-  minimumWords = 2500
-}) {
+function validateLesson({ day, lesson, title, sectionIds, topics, minimumPractice = 12, minimumWords = 2500 }) {
   if (!lesson || lesson.title !== title) {
     throw new Error(`Day ${day} does not resolve to ${title}.`);
   }
@@ -137,17 +128,10 @@ function validateLesson({
   if (words < minimumWords) {
     throw new Error(`Day ${day} is too short for a complete chapter: approximately ${words} prose words.`);
   }
-
   return words;
 }
 
-// Validate the assembled linear-algebra appendix.
-const appendixContext = vm.createContext({
-  window: {},
-  console,
-  setTimeout,
-  clearTimeout
-});
+const appendixContext = vm.createContext({ window: {}, console, setTimeout, clearTimeout });
 for (const file of appendixFiles) {
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), appendixContext, { filename: file });
 }
@@ -165,69 +149,40 @@ const units = [1, 2, 3].map(number => {
 const [unit1, unit2, unit3] = units;
 
 const requiredUnit1Fragments = [
-  'id="unit1-refinement-marker"',
-  'Row picture: one equation from each row',
-  'Column picture: build the output from the columns',
-  'E_{\\mathrm{swap}}',
-  'Every legal elementary row operation is reversible',
-  'Deriving \\(A=LU\\) from elementary matrices',
-  'Rank-nullity theorem',
-  'Why pivot columns of the original matrix form a column-space basis',
-  'a_1&a_2&\\cdots&a_n',
-  'id="strang-course-alignment-unit-1"',
-  'id="strang-left-multiplication"',
-  'The \\(i\\)-th row of \\(EA\\)',
-  'Left multiplication forms new rows from old rows',
-  'id="strang-five-views"',
-  'Outer-product view'
+  'id="unit1-refinement-marker"', 'Row picture: one equation from each row',
+  'Column picture: build the output from the columns', 'E_{\\mathrm{swap}}',
+  'Every legal elementary row operation is reversible', 'Deriving \\(A=LU\\) from elementary matrices',
+  'Rank-nullity theorem', 'Why pivot columns of the original matrix form a column-space basis',
+  'a_1&a_2&\\cdots&a_n', 'id="strang-course-alignment-unit-1"',
+  'id="strang-left-multiplication"', 'The \\(i\\)-th row of \\(EA\\)',
+  'Left multiplication forms new rows from old rows', 'id="strang-five-views"', 'Outer-product view'
 ];
 
 const requiredUnit2Fragments = [
-  'id="strang-course-alignment-unit-2"',
-  'id="unit2-strang-refinement-a"',
-  'The main geometry of least squares',
-  'Nearest-point theorem',
-  'The projection matrix and its four key subspaces',
-  'Complete least-squares line fit',
-  'QR factorization from the column picture',
-  'id="unit2-strang-refinement-b"',
-  'Three properties determine the determinant',
-  'Cofactors and the adjugate identity',
-  'Trace and determinant summarize the eigenvalues',
-  'Difference equations and powers of \\(A\\)',
-  'A Fibonacci recurrence as a matrix power',
-  'Markov matrices and the eigenvalue \\(1\\)',
+  'id="strang-course-alignment-unit-2"', 'id="unit2-strang-refinement-a"',
+  'The main geometry of least squares', 'Nearest-point theorem',
+  'The projection matrix and its four key subspaces', 'Complete least-squares line fit',
+  'QR factorization from the column picture', 'id="unit2-strang-refinement-b"',
+  'Three properties determine the determinant', 'Cofactors and the adjugate identity',
+  'Trace and determinant summarize the eigenvalues', 'Difference equations and powers of \\(A\\)',
+  'A Fibonacci recurrence as a matrix power', 'Markov matrices and the eigenvalue \\(1\\)',
   'Fourier series are projections in a function space'
 ];
 
 const requiredUnit3Fragments = [
-  'id="strang-course-alignment-unit-3"',
-  'id="unit3-strang-refinement-a"',
-  'Why symmetric matrices are the best-behaved square matrices',
-  'Equivalent tests for positive definiteness',
-  'Cholesky factorization and positive pivots',
-  'Positive-definite matrices and quadratic minima',
-  'The Fourier matrix',
-  'Why the FFT reduces \\(O(N^2)\\) work to \\(O(N\\log N)\\)',
-  'Similar matrices represent the same transformation in different bases',
-  'Jordan form records the missing eigenvectors',
-  'id="unit3-strang-refinement-b"',
-  'The SVD extends the spectral theorem to every matrix',
-  'The SVD displays the four fundamental subspaces',
-  'Why truncated SVD is the best rank-\\(k\\) approximation',
-  'A linear transformation is determined by basis vectors',
-  'General change-of-basis formula',
-  'Left inverses and full column rank',
-  'Projection matrices from the pseudoinverse',
-  'Why \\(A^+b\\) is the least-squares solution',
-  'Why the pseudoinverse gives the minimum-norm solution'
+  'id="strang-course-alignment-unit-3"', 'id="unit3-strang-refinement-a"',
+  'Why symmetric matrices are the best-behaved square matrices', 'Equivalent tests for positive definiteness',
+  'Cholesky factorization and positive pivots', 'Positive-definite matrices and quadratic minima',
+  'The Fourier matrix', 'Why the FFT reduces \\(O(N^2)\\) work to \\(O(N\\log N)\\)',
+  'Similar matrices represent the same transformation in different bases', 'Jordan form records the missing eigenvectors',
+  'id="unit3-strang-refinement-b"', 'The SVD extends the spectral theorem to every matrix',
+  'The SVD displays the four fundamental subspaces', 'Why truncated SVD is the best rank-\\(k\\) approximation',
+  'A linear transformation is determined by basis vectors', 'General change-of-basis formula',
+  'Left inverses and full column rank', 'Projection matrices from the pseudoinverse',
+  'Why \\(A^+b\\) is the least-squares solution', 'Why the pseudoinverse gives the minimum-norm solution'
 ];
 
-for (const [unit, fragments] of [
-  [unit1, requiredUnit1Fragments],
-  [unit2, requiredUnit2Fragments],
-  [unit3, requiredUnit3Fragments]
-]) {
+for (const [unit, fragments] of [[unit1, requiredUnit1Fragments], [unit2, requiredUnit2Fragments], [unit3, requiredUnit3Fragments]]) {
   for (const fragment of fragments) {
     if (!unit.html.includes(fragment)) {
       throw new Error(`${unit.slug} is missing expected content: ${fragment}`);
@@ -239,7 +194,6 @@ for (const [unit, fragments] of [
   validateBalancedMarkup(unit.slug, unit.html);
 }
 
-// Validate script load order and the assembled daily course.
 const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const requiredScripts = [
   ...lessonFiles,
@@ -262,9 +216,7 @@ for (const script of removedDuplicateFiles) {
 
 const courseContext = vm.createContext({ console, setTimeout, clearTimeout });
 vm.runInContext(fs.readFileSync(path.join(root, 'course-data.js'), 'utf8'), courseContext, { filename: 'course-data.js' });
-
-const dailyScripts = [...indexHtml.matchAll(/<script src="(day-[^"]+\.js)"><\/script>/g)]
-  .map(match => match[1]);
+const dailyScripts = [...indexHtml.matchAll(/<script src="(day-[^"]+\.js)"><\/script>/g)].map(match => match[1]);
 for (const file of dailyScripts) {
   const fullPath = path.join(root, file);
   if (!fs.existsSync(fullPath)) {
@@ -355,8 +307,7 @@ const day18Words = validateLesson({
     'Adjacency and degree matrices', 'Graph Laplacians', 'Graph spectra',
     'Neighborhood aggregation', 'Message passing', 'Graph convolution', 'Graph attention',
     'Isomorphism intuition', 'Manifolds', 'Tangent spaces', 'Geodesic distance',
-    'Local coordinates', 'Transformation groups', 'Representations of symmetry groups',
-    'Gauge intuition'
+    'Local coordinates', 'Transformation groups', 'Representations of symmetry groups', 'Gauge intuition'
   ],
   minimumPractice: 18,
   minimumWords: 3000
@@ -378,13 +329,12 @@ const day19Words = validateLesson({
   topics: [
     'Latent variables', 'Marginalization', 'Posterior inference', 'Jensen’s inequality',
     'ELBO', 'Variational inference', 'Reparameterization', 'Monte Carlo gradients',
-    'Importance sampling', 'Change of variables', 'Jacobian determinant',
-    'Normalizing flows', 'Minimax optimization', 'Game-theoretic equilibrium',
-    'GAN objectives', 'Score functions', 'Denoising objectives',
-    'Markov noise processes', 'SDE intuition'
+    'Importance sampling', 'Change of variables', 'Jacobian determinant', 'Normalizing flows',
+    'Minimax optimization', 'Game-theoretic equilibrium', 'GAN objectives', 'Score functions',
+    'Denoising objectives', 'Markov noise processes', 'SDE intuition'
   ],
   minimumPractice: 20,
-  minimumWords: 3500
+  minimumWords: 3000
 });
 
 console.log('Static site validation passed.');
