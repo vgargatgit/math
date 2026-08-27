@@ -36,7 +36,11 @@ const lessonFiles = [
   'day-19.js',
   'day-19-variational.js',
   'day-19-generative.js',
-  'day-19-diffusion-review.js'
+  'day-19-diffusion-review.js',
+  'day-20.js',
+  'day-20-bellman.js',
+  'day-20-control.js',
+  'day-20-review.js'
 ];
 
 for (const file of [...appendixFiles, ...lessonFiles]) {
@@ -231,8 +235,8 @@ const publishedDays = flatCourse
   .map((lesson, index) => ({ lesson, day: index + 1 }))
   .filter(({ lesson }) => lesson.published === true);
 
-if (publishedDays.length !== 19) {
-  throw new Error(`Expected exactly 19 published daily lessons, found ${publishedDays.length}.`);
+if (publishedDays.length !== 20) {
+  throw new Error(`Expected exactly 20 published daily lessons, found ${publishedDays.length}.`);
 }
 for (let index = 0; index < publishedDays.length; index += 1) {
   const expectedDay = index + 1;
@@ -240,8 +244,8 @@ for (let index = 0; index < publishedDays.length; index += 1) {
     throw new Error(`Published lessons are not contiguous. Expected Day ${expectedDay}, found Day ${publishedDays[index].day}.`);
   }
 }
-if (flatCourse[19]?.published === true) {
-  throw new Error('Day 20 is unexpectedly marked published.');
+if (flatCourse[20]?.published === true) {
+  throw new Error('Day 21 is unexpectedly marked published.');
 }
 
 const day16 = flatCourse[15];
@@ -337,12 +341,37 @@ const day19Words = validateLesson({
   minimumWords: 3000
 });
 
+const day20 = flatCourse[19];
+const day20Words = validateLesson({
+  day: 20,
+  lesson: day20,
+  title: 'Sequential Decision-Making and Reinforcement Learning',
+  sectionIds: [
+    'markov-chains', 'transition-matrices', 'stationary-distributions', 'mdp-components',
+    'discounted-return', 'value-functions', 'bellman-expectation', 'bellman-optimality',
+    'dynamic-programming', 'monte-carlo-evaluation', 'temporal-difference-learning',
+    'q-learning', 'exploration-exploitation', 'policy-gradients', 'advantage-functions',
+    'importance-sampling-rl', 'actor-critic-integration', 'common-mistakes',
+    'paper-reading-workflow', 'day20-recap'
+  ],
+  topics: [
+    'Markov chains', 'Transition matrices', 'Stationary distributions', 'Markov decision processes',
+    'States, actions, rewards, and policies', 'Discounted return', 'Value functions',
+    'Action-value functions', 'Bellman expectation and optimality equations', 'Dynamic programming',
+    'Monte Carlo evaluation', 'Temporal-difference learning', 'Q-learning', 'Policy gradients',
+    'Advantage functions', 'Importance sampling', 'Exploration and exploitation'
+  ],
+  minimumPractice: 20,
+  minimumWords: 3000
+});
+
 console.log('Static site validation passed.');
-console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 20.`);
+console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 21.`);
 console.log(`Day 16: ${day16.sections.length} sections; ${day16.practice.length} practice questions; approximately ${day16Words} prose words.`);
 console.log(`Day 17: ${day17.sections.length} sections; ${day17.practice.length} practice questions; approximately ${day17Words} prose words.`);
 console.log(`Day 18: ${day18.sections.length} sections; ${day18.practice.length} practice questions; approximately ${day18Words} prose words.`);
 console.log(`Day 19: ${day19.sections.length} sections; ${day19.practice.length} practice questions; approximately ${day19Words} prose words.`);
+console.log(`Day 20: ${day20.sections.length} sections; ${day20.practice.length} practice questions; approximately ${day20Words} prose words.`);
 for (const unit of units) {
   console.log(`${unit.shortTitle}: ${unit.html.length.toLocaleString()} characters; ${count(unit.html, '<details>')} expandable solutions`);
 }
