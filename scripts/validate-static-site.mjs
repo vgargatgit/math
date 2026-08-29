@@ -26,7 +26,8 @@ const lessonFiles = [
   'day-18.js', 'day-18-graphs.js', 'day-18-geometry.js', 'day-18-review.js',
   'day-19.js', 'day-19-variational.js', 'day-19-generative.js', 'day-19-diffusion-review.js',
   'day-20.js', 'day-20-bellman.js', 'day-20-control.js', 'day-20-review.js',
-  'day-21.js', 'day-21-kernels.js', 'day-21-ensembles.js', 'day-21-review.js'
+  'day-21.js', 'day-21-kernels.js', 'day-21-ensembles.js', 'day-21-review.js',
+  'day-22.js', 'day-22-derivation.js', 'day-22-practice.js', 'day-22-review.js'
 ];
 
 for (const file of [...appendixFiles, ...lessonFiles]) {
@@ -109,13 +110,13 @@ for (const file of dailyScripts) {
 
 const course = vm.runInContext('COURSE', courseContext);
 const flatCourse = course.flatMap(section => section.lessons);
+if (flatCourse.length !== 22) throw new Error(`Expected 22 planned lessons, found ${flatCourse.length}.`);
 const publishedDays = flatCourse.map((lesson, index) => ({ lesson, day: index + 1 })).filter(({ lesson }) => lesson.published === true);
-if (publishedDays.length !== 21) throw new Error(`Expected exactly 21 published daily lessons, found ${publishedDays.length}.`);
+if (publishedDays.length !== 22) throw new Error(`Expected all 22 daily lessons to be published, found ${publishedDays.length}.`);
 for (let index = 0; index < publishedDays.length; index += 1) {
   const expectedDay = index + 1;
   if (publishedDays[index].day !== expectedDay) throw new Error(`Published lessons are not contiguous. Expected Day ${expectedDay}, found Day ${publishedDays[index].day}.`);
 }
-if (flatCourse[21]?.published === true) throw new Error('Day 22 is unexpectedly marked published.');
 
 const configs = [
   {
@@ -153,6 +154,12 @@ const configs = [
     sectionIds: ['similarity-functions','psd-kernels','feature-maps','kernel-trick','rkhs-intuition','margin-geometry','support-vector-machines','kernel-svm','kernel-regression','kernel-method-computation','decision-trees','tree-split-criteria','bagging','random-forests','boosting-additive-models','gradient-boosting','common-mistakes','paper-reading-workflow','day21-recap'],
     topics: ['Similarity functions','PSD kernels','Feature maps','Kernel trick','RKHS intuition','Margin geometry','Support-vector machines','Kernel regression','Decision trees','Bagging','Random forests','Boosting','Additive models','Gradient boosting'],
     minimumPractice: 20, minimumWords: 3000
+  },
+  {
+    day: 22, title: 'Paper-Reading Practicum',
+    sectionIds: ['reading-as-reconstruction','identify-mathematical-objects','annotate-shapes','translate-notation','definitions-versus-claims','find-central-objective','reconstruct-one-derivation','derivation-audit','list-assumptions','assumption-stress-test','create-toy-example','toy-example-probability','implement-equation','implementation-shape-tests','math-versus-empirical-evidence','worked-paper-reconstruction','common-mistakes','paper-reading-workflow','day22-recap'],
+    topics: ['Identify mathematical objects','Annotate shapes','Translate notation','Separate definitions from claims','Find the central objective','Reconstruct one derivation','List assumptions','Create a toy numerical example','Implement the equation','Separate mathematical and empirical evidence'],
+    minimumPractice: 20, minimumWords: 3000
   }
 ];
 
@@ -163,7 +170,7 @@ for (const config of configs) {
 }
 
 console.log('Static site validation passed.');
-console.log(`Published daily lessons: ${publishedDays.length}; next unpublished day: 22.`);
+console.log(`Published daily lessons: ${publishedDays.length} of ${flatCourse.length}; course complete.`);
 for (const config of configs) {
   const lesson = flatCourse[config.day - 1];
   console.log(`Day ${config.day}: ${lesson.sections.length} sections; ${lesson.practice.length} practice questions; approximately ${wordCounts.get(config.day)} prose words.`);
